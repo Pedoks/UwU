@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UwU</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Name Input Section */
+        #name-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        #name-input {
+            padding: 15px;
+            border-radius: 25px;
+            border: none;
+            width: 100%;
+            font-size: 18px;
+            text-align: center;
+            background: #333;
+            color: white;
+            outline: none;
+        }
+
+        #start-button {
+            background: linear-gradient(135deg, #ff3366, #ff6633);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            font-weight: bold;
+        }
+
+        #start-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Hold Button Section */
+        #hold-button-container {
+            position: relative;
+            margin: 0 auto;
+            width: 200px;
+            height: 200px;
+            transition: all 0.5s ease;
+            display: none;
+        }
+
+        /* Circular Hold Button */
+        #hold-button {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #ff3366, #ff6633);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.4);
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 10px;
+        }
+
+        #hold-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(255, 51, 102, 0.4);
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 0, 0.6), rgba(255, 255, 0, 0.4));
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        /* Karaoke Container */
+        .karaoke-container {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(to bottom, #121212, #242424);
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hide audio controls but keep the element */
+        #audio {
+            display: none;
+        }
+
+        /* Lyrics container */
+        #lyrics-container {
+            font-size: 40px;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .lyric {
+            position: absolute;
+            opacity: 0;
+            transition: all 0.8s ease;
+            transform: translateY(30px);
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            max-width: 80%;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        .highlight {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            color: #ffcc33;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 204, 51, 0.5);
+        }
+
+        .username-highlight {
+            color: #ff3366;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+        }
+
+
+        /* Play/Pause button */
+        #play-pause {
+            position: absolute;
+            bottom: 40px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff3366, #ff6633);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.4);
+        }
+
+        #play-pause:hover {
+            transform: scale(1.05);
+        }
+
+        /* Timer */
+        #timer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 16px;
+            color: #aaa;
+        }
+
+        /* Exit animation */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .fade-out {
+            animation: fadeOut 2s forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Section (Visible First) -->
+    <div id="name-input-container">
+        <h2>Enter Your Name</h2>
+        <input type="text" id="name-input" placeholder="Your Name">
+        <button id="start-button">Continue</button>
+    </div>
+
+    <!-- Hold Button Section (Hidden Initially) -->
+    <div id="hold-button-container">
+        <div id="hold-button">Hold here for 5 seconds</div>
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- Karaoke Section (Hidden Initially) -->
+    <div class="karaoke-container" id="karaoke-container">
+        <audio id="audio">
+            <source src="Assets/NIKI - You'll be in my heart (Spotify Single)  Music Lyric Video.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div id="lyrics-container"></div>
+        <div id="play-pause">❚❚</div>
+        <div id="timer">2:00</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Base lyrics array
+            const baseLyrics = [
+                { time: 122, text: "Don't listen to them" },
+                { time: 126, text: "'Cause what do they know" },
+                { time: 128, text: "We need each other, to have, to hold" },
+                { time: 133, text: "They'll see in time, I know" },
+                { time: 144, text: "When destiny calls you, you must be strong" },
+                { time: 149, text: "I may not be with you" },
+                { time: 151, text: "But you've got to hold on" },
+                { time: 155, text: "They'll see in time, I know" },
+                { time: 161, text: "We'll show them together" },
+                { time: 164, text: "'Cause you'll be in my heart" },
+                { time: 168, text: "Yes, you'll be in my heart" },
+                { time: 175, text: "From this day on" },
+                { time: 177, text: "Now and forever more, " }
+            ];
+
+            // DOM Elements
+            const audio = document.getElementById("audio");
+            const lyricsContainer = document.getElementById("lyrics-container");
+            const holdButton = document.getElementById("hold-button");
+            const progressBar = document.getElementById("progress-bar");
+            const karaokeContainer = document.getElementById("karaoke-container");
+            const holdButtonContainer = document.getElementById("hold-button-container");
+            const playPauseButton = document.getElementById("play-pause");
+            const timer = document.getElementById("timer");
+            const nameInputContainer = document.getElementById("name-input-container");
+            const nameInput = document.getElementById("name-input");
+            const startButton = document.getElementById("start-button");
+            const usernameDisplay = document.getElementById("username-display");
+
+            let holdTime = 0;
+            let holdInterval;
+            let isPaused = false;
+            let currentLyricIndex = -1;
+            let userName = "";
+            const END_TIME = 187; 
+
+            // Check if name exists in local storage
+            if(localStorage.getItem("karaokeName")) {
+                userName = localStorage.getItem("karaokeName");
+                nameInput.value = userName;
+            }
+            
+            // Start button event listener
+            startButton.addEventListener("click", function() {
+                userName = nameInput.value.trim();
+                if(userName) {
+                    // Save name to local storage (similar to SharedPreferences in Android)
+                    localStorage.setItem("karaokeName", userName);
+                    
+                    // Hide name input, show hold button
+                    nameInputContainer.style.display = "none";
+                    holdButtonContainer.style.display = "flex";
+                    
+                    // Display username in the hold button
+                    usernameDisplay.textContent = userName;
+                } else {
+                    alert("Please enter your name!");
+                }
+            });
+
+            // Build lyrics array with user name at the end
+            function buildLyrics() {
+                let lyrics = [...baseLyrics];
+                
+                // Add user name as a separate object for special styling
+                lyrics[lyrics.length - 1].userNameIncluded = true;
+                
+                return lyrics;
+            }
+
+            // Create lyric elements
+            function createLyricElements() {
+                // Clear existing lyrics
+                lyricsContainer.innerHTML = "";
+                
+                // Get lyrics with user name
+                const lyrics = buildLyrics();
+                
+                lyrics.forEach((line) => {
+                    let p = document.createElement("p");
+                    p.classList.add("lyric");
+                    
+                    if (line.userNameIncluded) {
+                        // Base text
+                        p.textContent = line.text;
+                        
+                        // Add the username with special highlighting
+                        let userSpan = document.createElement("span");
+                        userSpan.textContent = userName;
+                        userSpan.classList.add("username-highlight");
+                        p.appendChild(userSpan);
+                    } else {
+                        p.textContent = line.text;
+                    }
+                    
+                    lyricsContainer.appendChild(p);
+                });
+            }
+
+            // Mouse events for desktop
+            holdButton.addEventListener("mousedown", startHolding);
+            document.addEventListener("mouseup", stopHolding);
+            
+            // Touch events for mobile
+            holdButton.addEventListener("touchstart", function(e) {
+                e.preventDefault(); // Prevent default behavior
+                startHolding();
+            });
+            
+            document.addEventListener("touchend", stopHolding);
+            
+            // Prevent context menu
+            holdButton.addEventListener("contextmenu", (e) => e.preventDefault());
+
+            function startHolding() {
+                console.log("Hold started");
+                clearInterval(holdInterval); // Clear any existing interval
+                holdTime = 0;
+                progressBar.style.width = "0%";
+                
+                holdInterval = setInterval(() => {
+                    holdTime += 100;
+                    let progress = (holdTime / 5000) * 100;
+                    
+                    // Update progress bar width
+                    progressBar.style.width = progress + "%";
+                    
+                    if (holdTime >= 5000) {
+                        console.log("Hold complete!");
+                        clearInterval(holdInterval);
+                        startKaraoke();
+                    }
+                }, 100);
+            }
+            
+            function stopHolding() {
+                console.log("Hold stopped");
+                clearInterval(holdInterval);
+                holdTime = 0;
+                progressBar.style.width = "0%";
+            }
+
+            // Play/Pause functionality
+            playPauseButton.addEventListener("click", () => {
+                if (isPaused) {
+                    audio.play();
+                    playPauseButton.textContent = "❚❚";
+                    isPaused = false;
+                } else {
+                    audio.pause();
+                    playPauseButton.textContent = "▶";
+                    isPaused = true;
+                }
+            });
+
+            // Format time (2:05 format)
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }
+
+            // Check for end time
+            function checkEndTime() {
+                if (audio.currentTime >= END_TIME) {
+                    exitKaraoke();
+                }
+            }
+
+            // Exit karaoke function
+            function exitKaraoke() {
+                console.log("Exiting karaoke...");
+                karaokeContainer.classList.add('fade-out');
+                
+                // After fade out animation, reload page
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+
+            // Start Karaoke at 2:00 (120s)
+            function startKaraoke() {
+                console.log("Starting karaoke...");
+                
+                // Create lyric elements with username
+                createLyricElements();
+                
+                // Get all lyric elements
+                const lines = document.querySelectorAll(".lyric");
+                
+                // Hide the hold button container with animation
+                holdButtonContainer.style.opacity = "0";
+                
+                setTimeout(() => {
+                    holdButtonContainer.style.display = "none";
+                    
+                    // Show the karaoke lyrics section
+                    karaokeContainer.style.display = "flex";
+                    
+                    // Start playing the audio at 2:00
+                    audio.currentTime = 120;
+                    
+                    // Try to play and handle any errors
+                    audio.play().catch(error => {
+                        console.error("Audio play failed:", error);
+                        alert("Couldn't play audio. Make sure the file path is correct.");
+                    });
+                    
+                    // Update timer
+                    setInterval(() => {
+                        timer.textContent = formatTime(audio.currentTime);
+                        checkEndTime();
+                    }, 1000);
+                    
+                    // Get lyrics with username
+                    const lyrics = buildLyrics();
+                    
+                    // Sync lyrics with audio
+                    audio.addEventListener("timeupdate", () => {
+                        let foundActivelyric = false;
+                        
+                        // Find the current lyric based on time
+                        for (let i = 0; i < lyrics.length; i++) {
+                            // If we're at or past this lyric's time AND
+                            // either it's the last lyric OR we haven't reached the next lyric's time
+                            if (audio.currentTime >= lyrics[i].time && 
+                                (i === lyrics.length - 1 || audio.currentTime < lyrics[i + 1].time)) {
+                                
+                                // Only apply changes if we're showing a new lyric
+                                if (currentLyricIndex !== i) {
+                                    // Remove highlight from all lyrics
+                                    lines.forEach(lyric => lyric.classList.remove("highlight"));
+                                    
+                                    // Add highlight to current lyric
+                                    lines[i].classList.add("highlight");
+                                    currentLyricIndex = i;
+                                }
+                                
+                                foundActivelyric = true;
+                                break;
+                            }
+                        }
+                        
+                        // If no active lyric found (e.g., between lyrics), remove all highlights
+                        if (!foundActivelyric) {
+                            lines.forEach(lyric => lyric.classList.remove("highlight"));
+                            currentLyricIndex = -1;
+                        }
+                    });
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
